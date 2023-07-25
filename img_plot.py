@@ -3,28 +3,25 @@ from pgmpy.models import BayesianNetwork
 import pygraphviz as pgv
 from IPython.display import Image
 
-
-# 读取边的数据
+# Load the edge data
 edges_df = pd.read_excel('output/edges.xlsx')
 
-# 创建BayesianModel对象
+# Create a BayesianModel object
 model = BayesianNetwork(list(map(tuple, edges_df.values)))
 
-
-# 转换为networkx图
+# Convert to networkx graph
 nx_graph = model.to_directed()
 
 
-# 创建一个新的有向图
+# Create a new directed graph
 G = pgv.AGraph(directed=True)
 
-# 添加节点和边
+# Add nodes and edges
 for edge in model.edges():
     G.add_edge(edge[0], edge[1])
 
-# 保存图像
+# Save the image
 G.draw('output/graph.png', prog='dot', format='png')
 
-# 显示图像
+# Display
 Image(filename='output/graph.png')
-

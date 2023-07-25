@@ -25,23 +25,28 @@ for cpd in model.get_cpds():
     print("CPD of {variable}:".format(variable=cpd.variable))
     print(cpd)
 
+# 打印节点的条件概率分布并保存到txt文件
+with open('output/cpds.txt', 'w') as f:
+    for cpd in model.get_cpds():
+        f.write("CPD of {variable}:\n".format(variable=cpd.variable))
+        f.write(str(cpd))
+        f.write('\n\n')
+
+
 # 保存我们学习到的模型的边到Excel文件
-edges_df = pd.DataFrame(best_model.edges(), columns=['Node1', 'Node2'])
+edges_df = pd.DataFrame(best_model.edges(), columns=['Parent_Node', 'Child_Node'])
 edges_df.to_excel('output/edges.xlsx', index=False)
 
 # 保存节点的条件概率分布到Excel文件
-cpds = []
 for cpd in model.get_cpds():
     # 创建一个空的DataFrame来存储这个CPD的数据
-    cpd_df = pd.DataFrame(columns=[cpd.variable] + cpd.variables[1:] + ['probability'])
+    cpd_df = pd.DataFrame(columns=[cpd.variable] + [f'Parent_{i+1}' for i in range(len(cpd.variables)-1)] + ['State', 'Probability'])
     # 遍历这个CPD的每个元素
     for indices in np.ndindex(*cpd.values.shape):
-        # 获取对应的父节点状态和概率值
-        parent_states = [cpd.state_names[var][index] for var, index in zip(cpd.variables, indices)]
+        # 获取对应的节点状态和概率值
+        states = [cpd.state_names[var][index] for var, index in zip(cpd.variables, indices)]
         prob = cpd.values[indices]
         # 将这些数据添加到我们的DataFrame中
-        cpd_df.loc[len(cpd_df)] = parent_states + [prob]
-    cpds.append(cpd_df)
-
-cpds_df = pd.concat(cpds)
-cpds_df.to_excel('output/cpds.xlsx')
+        cpd_df.loc[len(cpd_df)] = states + [prob]
+    # 为每个节点保存一个单独的文件
+    cpd_df.to_excel(f'output/cpds/{cpd.variable}.xlsx', index=False)

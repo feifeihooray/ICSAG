@@ -12,7 +12,6 @@ model = BayesianNetwork(list(map(tuple, edges_df.values)))
 # Convert to networkx graph
 nx_graph = model.to_directed()
 
-
 # Create a new directed graph
 G = pgv.AGraph(directed=True)
 
